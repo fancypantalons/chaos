@@ -1,213 +1,217 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
-import java.io.*;
-import java.awt.event.*;
-import java.awt.image.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 
 public class MainWin extends JFrame implements ActionListener
 {
-  ROMFile rom;
-  int level = 0;  
-  
-  MapCanvas mapCanvas;
-  BlockSelector blockSelector;
+    ROMFile rom;
+    int level = 0;
 
-  JComboBox levelSelector;
-  JScrollPane scrollPane;
+    MapCanvas mapCanvas;
+    BlockSelector blockSelector;
 
-  public MainWin(String rn) throws IOException
-  {
-    super("Chaos");
+    JComboBox levelSelector;
+    JScrollPane scrollPane;
 
-    Container pane = getContentPane();
-    Box hbox = Box.createHorizontalBox();
-    JPanel mainPane = new JPanel();
-    Box controlBox = Box.createVerticalBox();
+    public MainWin(String rn) throws IOException
+    {
+        super("Chaos");
 
-    JMenuBar menuBar = new JMenuBar();
-    JMenu fileMenu = new JMenu("File");  
-    
-    levelSelector = new JComboBox();
-    levelSelector.addActionListener(this);
-    blockSelector = new BlockSelector();
-    scrollPane = new JScrollPane();
+        Container pane = getContentPane();
+        Box hbox = Box.createHorizontalBox();
+        JPanel mainPane = new JPanel();
+        Box controlBox = Box.createVerticalBox();
 
-    pane.setLayout(new BorderLayout());
-    pane.add(menuBar, BorderLayout.NORTH);
-    pane.add(mainPane, BorderLayout.CENTER);
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
 
-    mainPane.setLayout(new BorderLayout());
+        levelSelector = new JComboBox();
+        levelSelector.addActionListener(this);
+        blockSelector = new BlockSelector();
+        scrollPane = new JScrollPane();
 
-    mainPane.add(scrollPane, BorderLayout.CENTER);
-    mainPane.add(controlBox, BorderLayout.WEST);
-    controlBox.add(hbox);
+        pane.setLayout(new BorderLayout());
+        pane.add(menuBar, BorderLayout.NORTH);
+        pane.add(mainPane, BorderLayout.CENTER);
 
-    hbox.add(new JLabel("Level: "));
-    hbox.add(levelSelector);
+        mainPane.setLayout(new BorderLayout());
 
-    levelSelector.addItem(" ");
+        mainPane.add(scrollPane, BorderLayout.CENTER);
+        mainPane.add(controlBox, BorderLayout.WEST);
+        controlBox.add(hbox);
 
-    controlBox.add(blockSelector);
-    blockSelector.addActionListener(this);
+        hbox.add(new JLabel("Level: "));
+        hbox.add(levelSelector);
 
-    menuBar.add(fileMenu);
-    fileMenu.add(createMenuItem("Load Levels"));
-    fileMenu.add(createMenuItem("Save Level"));
-    fileMenu.add(createMenuItem("Quit"));
+        levelSelector.addItem(" ");
 
-    //    getLayeredPane().setLayout(new FlowLayout());
+        controlBox.add(blockSelector);
+        blockSelector.addActionListener(this);
 
-    setSize(640, 480);
+        menuBar.add(fileMenu);
+        fileMenu.add(createMenuItem("Load Levels"));
+        fileMenu.add(createMenuItem("Save Level"));
+        fileMenu.add(createMenuItem("Quit"));
 
-    rom = new ROMFile(rn);
+        //    getLayeredPane().setLayout(new FlowLayout());
 
-    if (rn != null)
-	{
-	  loadDataInfo(rom);
-	    
-	  rom.checkROM();
-	  loadLevel(rom, level);
-	}
-  }
+        setSize(640, 480);
 
-  void loadDataInfo(ROMFile rom) throws IOException
-  {
-    int i;
+        rom = new ROMFile(rn);
 
-    levelSelector.removeAllItems();
+        if (rn != null)
+        {
+            loadDataInfo(rom);
 
-    for (i = 0; i < 20; i++)
-      {
-	levelSelector.addItem(Integer.toString(i + 1));
-      }
-  }
-
-  void loadLevel(ROMFile rom, int l_num) throws IOException
-  {
-    level = l_num;
-
-    Palette pal = null;
-    Tile[] tiles = null;
-    Chunk[] chunks = null;
-    Block[] blocks = null;
-    Sprite[] sprites = null;
-
-    try {
-      pal = rom.readPalette(level);
-      tiles = rom.readTiles(level);
-      chunks = rom.readChunks(tiles, pal, level);
-      blocks = rom.readBlocks(chunks, pal, level);
-      sprites = rom.readSprites(level);
-    } catch (IOException e) {
-      System.err.println("Error loading level: ");
-      e.printStackTrace();
-      return;
+            rom.checkROM();
+            loadLevel(rom, level);
+        }
     }
 
-    Map levelMap = rom.readMap(blocks, sprites, pal, level);
+    void loadDataInfo(ROMFile rom) throws IOException
+    {
+        int i;
 
-    if (mapCanvas != null)
-      {
-        mapCanvas.setMap(levelMap);
-        mapCanvas.setSprites(sprites);
-      }
-    else
-      {
-        mapCanvas = new MapCanvas(levelMap, sprites);
-      }
-    
-    JViewport view = new JViewport();
+        levelSelector.removeAllItems();
 
-    view.add(mapCanvas);
-    scrollPane.setViewport(view);
-    mapCanvas.setVisible(true);
+        for (i = 0; i < 20; i++)
+        {
+            levelSelector.addItem(Integer.toString(i + 1));
+        }
+    }
 
-    blockSelector.setBlocks(blocks);
+    void loadLevel(ROMFile rom, int l_num) throws IOException
+    {
+        level = l_num;
 
-    getContentPane().validate();
-  }
+        Palette pal = null;
+        Tile[] tiles = null;
+        Chunk[] chunks = null;
+        Block[] blocks = null;
+        Sprite[] sprites = null;
 
-  void saveLevel(ROMFile rom, int l_num) throws IOException
-  {
-      
-  }
-  
-  JMenuItem createMenuItem(String name)
-  {
-    JMenuItem item = new JMenuItem(name);
+        try
+        {
+            pal = rom.readPalette(level);
+            tiles = rom.readTiles(level);
+            chunks = rom.readChunks(tiles, pal, level);
+            blocks = rom.readBlocks(chunks, pal, level);
+            sprites = rom.readSprites(level);
+        }
+        catch (IOException e)
+        {
+            System.err.println("Error loading level: ");
+            e.printStackTrace();
+            return;
+        }
 
-    item.addActionListener(this);
-    return item;
-  }
+        Map levelMap = rom.readMap(blocks, sprites, pal, level);
 
-  public void actionPerformed(ActionEvent e)
-  {
-    if (e.getSource() == blockSelector)
-      {
-        if (e.getActionCommand() != "clicked")
-          {
-            try
-              {
-                  // levelMap.setBlock(Integer.parseInt(e.getActionCommand()));
-              }
-            catch (Exception ex)
-              {
-              }
-          }
+        if (mapCanvas != null)
+        {
+            mapCanvas.setMap(levelMap);
+            mapCanvas.setSprites(sprites);
+        }
         else
-          {
-          }
-      }
-    else if (e.getActionCommand() == "Load Levels")
-      {
-	JFileChooser f = new JFileChooser(".");
-	int result = f.showOpenDialog(this);
+        {
+            mapCanvas = new MapCanvas(levelMap, sprites);
+        }
 
-	if ((result == JFileChooser.ERROR_OPTION) ||
-	    (result == JFileChooser.CANCEL_OPTION))
-	  return;
+        JViewport view = new JViewport();
 
-	try
-	  {
-	    String rn = f.getSelectedFile().getAbsolutePath();
+        view.add(mapCanvas);
+        scrollPane.setViewport(view);
+        mapCanvas.setVisible(true);
 
-            rom = new ROMFile(rn);
+        blockSelector.setBlocks(blocks);
 
-	    loadDataInfo(rom);
+        getContentPane().validate();
+    }
 
-	    rom.checkROM();
-	    loadLevel(rom, level);
-	  }
-	catch (IOException ex)
-	  {
-	  }
-      }
-    else if (e.getActionCommand() == "Save Level")
-      {
-	try
-	  {
-	    saveLevel(rom, level);
-	  }
-	catch (IOException ex)
-	  {
-	  }
-      }
-    else if (e.getActionCommand() == "Quit")
-      {
-	System.exit(0);
-      }
-    else if (e.getSource() == levelSelector)
-      {
-	String level_str = (String) levelSelector.getSelectedItem();
+    void saveLevel(ROMFile rom, int l_num) throws IOException
+    {
 
-	try
-	  {
-	    loadLevel(rom, Integer.parseInt(level_str) - 1);
-	  }
-	catch (Exception ex)
-	  {
-	  }
-      }
-  }
+    }
+
+    JMenuItem createMenuItem(String name)
+    {
+        JMenuItem item = new JMenuItem(name);
+
+        item.addActionListener(this);
+        return item;
+    }
+
+    public void actionPerformed(ActionEvent e)
+    {
+        if (e.getSource() == blockSelector)
+        {
+            if (e.getActionCommand() != "clicked")
+            {
+                try
+                {
+                    // levelMap.setBlock(Integer.parseInt(e.getActionCommand()));
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+            else
+            {
+            }
+        }
+        else if (e.getActionCommand() == "Load Levels")
+        {
+            JFileChooser f = new JFileChooser(".");
+            int result = f.showOpenDialog(this);
+
+            if ((result == JFileChooser.ERROR_OPTION) ||
+                (result == JFileChooser.CANCEL_OPTION))
+            {
+                return;
+            }
+
+            try
+            {
+                String rn = f.getSelectedFile().getAbsolutePath();
+
+                rom = new ROMFile(rn);
+
+                loadDataInfo(rom);
+
+                rom.checkROM();
+                loadLevel(rom, level);
+            }
+            catch (IOException ex)
+            {
+            }
+        }
+        else if (e.getActionCommand() == "Save Level")
+        {
+            try
+            {
+                saveLevel(rom, level);
+            }
+            catch (IOException ex)
+            {
+            }
+        }
+        else if (e.getActionCommand() == "Quit")
+        {
+            System.exit(0);
+        }
+        else if (e.getSource() == levelSelector)
+        {
+            String level_str = (String) levelSelector.getSelectedItem();
+
+            try
+            {
+                loadLevel(rom, Integer.parseInt(level_str) - 1);
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+    }
 }

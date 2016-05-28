@@ -1,76 +1,80 @@
-import java.io.*;
-import java.lang.*;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 public class SMDFile extends RandomAccessFile
 {
-  long pos;
+    long pos;
 
-  public SMDFile(String name, String mode) throws IOException
-  {
-    super(name, mode);
+    public SMDFile(String name, String mode) throws IOException
+    {
+        super(name, mode);
 
-    pos = 0;
-  }
+        pos = 0;
+    }
 
-  public int read() throws IOException
-  {
-    seekToPos(pos++);
+    public int read() throws IOException
+    {
+        seekToPos(pos++);
 
-    return super.read();
-  }
+        return super.read();
+    }
 
-  public void seek(long pos) throws IOException
-  {
-    this.pos = pos;
-  }
+    public void seek(long pos) throws IOException
+    {
+        this.pos = pos;
+    }
 
-  public void skip(long offs)
-  {
-    this.pos += offs;
-  }
+    public void skip(long offs)
+    {
+        this.pos += offs;
+    }
 
-  public int[] readAll() throws IOException
-  {
-    int buf[] = new int[(int)(super.length()) - 512];
-    int i;
-    
-    for (i = 0; i < buf.length; i++)
-      {
-        seekToPos(i);
-        
-        buf[i] = super.read();
-      }
+    public int[] readAll() throws IOException
+    {
+        int buf[] = new int[(int) (super.length()) - 512];
+        int i;
 
-    return buf;
-  }
+        for (i = 0; i < buf.length; i++)
+        {
+            seekToPos(i);
 
-  public void write(int c) throws IOException
-  {
-    seekToPos(pos++);
-    super.write(c);
-  }
+            buf[i] = super.read();
+        }
 
-  public long getFilePointer()
-  {
-    return pos;
-  }
+        return buf;
+    }
 
-  public long length() throws IOException
-  {
-    return super.length() - 512;
-  }
+    public void write(int c) throws IOException
+    {
+        seekToPos(pos++);
+        super.write(c);
+    }
 
-  void seekToPos(long position) throws IOException
-  {
-    long block_num = position >> 14;
-    long block_offs = position % 16384;
-    long offset = 512 + (block_num << 14);
+    public long getFilePointer()
+    {
+        return pos;
+    }
 
-    if ((block_offs & 1) == 1)
-      offset += (block_offs - 1) >> 1;
-    else
-      offset += (block_offs >> 1) + 8192;
+    public long length() throws IOException
+    {
+        return super.length() - 512;
+    }
 
-    super.seek(offset);
-  }
+    void seekToPos(long position) throws IOException
+    {
+        long block_num = position >> 14;
+        long block_offs = position % 16384;
+        long offset = 512 + (block_num << 14);
+
+        if ((block_offs & 1) == 1)
+        {
+            offset += (block_offs - 1) >> 1;
+        }
+        else
+        {
+            offset += (block_offs >> 1) + 8192;
+        }
+
+        super.seek(offset);
+    }
 }

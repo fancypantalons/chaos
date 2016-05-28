@@ -1,187 +1,207 @@
 import javax.swing.*;
-import java.awt.image.*;
-import java.awt.geom.*;
-import java.awt.event.*;
+import javax.swing.border.Border;
 import java.awt.*;
-import javax.swing.border.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 class BlockPanel extends JPanel implements MouseListener
 {
-  AffineTransform transform;
-  Block blocks[];	 
-  int block_num;
-  boolean selected;
+    AffineTransform transform;
+    Block blocks[];
+    int block_num;
+    boolean selected;
 
-  ActionListener actionListener = null;
+    ActionListener actionListener = null;
 
-  public BlockPanel(Block b[], int num)
-  {
-    super();
+    public BlockPanel(Block b[], int num)
+    {
+        super();
 
-    transform = new AffineTransform();
-    transform.scale(0.5, 0.5);
+        transform = new AffineTransform();
+        transform.scale(0.5, 0.5);
 
-    setBorder(BorderFactory.createLoweredBevelBorder());
+        setBorder(BorderFactory.createLoweredBevelBorder());
 
-    blocks = b;
-    block_num = num;
+        blocks = b;
+        block_num = num;
 
-    addMouseListener(this);
-  }
+        addMouseListener(this);
+    }
 
-  public void paintComponent(Graphics g)
-  {
-    Border b = getBorder();
-    BufferedImage scaled = new BufferedImage(64, 64, 
-					     BufferedImage.TYPE_INT_ARGB);
-    Graphics2D gfx = scaled.createGraphics();
+    public void paintComponent(Graphics g)
+    {
+        Border b = getBorder();
+        BufferedImage scaled = new BufferedImage(
+            64, 64,
+            BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics2D gfx = scaled.createGraphics();
 
-    gfx.drawImage(blocks[block_num].getImage(), transform, this);
+        gfx.drawImage(blocks[block_num].getImage(), transform, this);
 
-    if (selected)
-      {
-	  BufferedImage overlay = new BufferedImage(64, 64, 
-						    BufferedImage.TYPE_INT_ARGB);
-	  Graphics2D gfx_o = overlay.createGraphics();
+        if (selected)
+        {
+            BufferedImage overlay = new BufferedImage(
+                64, 64,
+                BufferedImage.TYPE_INT_ARGB
+            );
+            Graphics2D gfx_o = overlay.createGraphics();
 
-	  gfx_o.setColor(new Color((float) 0.0, 
-				   (float) 0.0, 
-				   (float) 1.0, 
-				   (float) 0.5));
-	  gfx_o.fill(new Rectangle(0, 0, 64, 64));
+            gfx_o.setColor(
+                new Color(
+                    (float) 0.0,
+                    (float) 0.0,
+                    (float) 1.0,
+                    (float) 0.5
+                )
+            );
+            gfx_o.fill(new Rectangle(0, 0, 64, 64));
 
-	  gfx.drawImage(overlay, 0, 0, this);
-      }
+            gfx.drawImage(overlay, 0, 0, this);
+        }
 
-    g.drawImage(scaled,
-		b.getBorderInsets(this).left, 
-		b.getBorderInsets(this).top, 
-		this);
-  }
+        g.drawImage(
+            scaled,
+            b.getBorderInsets(this).left,
+            b.getBorderInsets(this).top,
+            this
+        );
+    }
 
-  public void unselect()
-  {
-    selected = false;
-    repaint();
-  }
+    public void unselect()
+    {
+        selected = false;
+        repaint();
+    }
 
-  public Dimension getMinimumSize()
-  {
-    return new Dimension (64, 64);
-  }
+    public Dimension getMinimumSize()
+    {
+        return new Dimension(64, 64);
+    }
 
-  public Dimension getPreferredSize()
-  {
-    return new Dimension (64, 64);
-  }
+    public Dimension getPreferredSize()
+    {
+        return new Dimension(64, 64);
+    }
 
-  public void addActionListener(ActionListener l)
-  {
-    actionListener = AWTEventMulticaster.add(actionListener, l);
-  }
-      
-  public void removeActionListener(ActionListener l)
-  {
-    actionListener = AWTEventMulticaster.remove(actionListener, l);
-  }
+    public void addActionListener(ActionListener l)
+    {
+        actionListener = AWTEventMulticaster.add(actionListener, l);
+    }
 
-  public void mouseClicked(MouseEvent e)
-  {
-    ActionEvent action = new ActionEvent(this, 
-					 ActionEvent.ACTION_PERFORMED,
-					 Integer.toString(block_num));
+    public void removeActionListener(ActionListener l)
+    {
+        actionListener = AWTEventMulticaster.remove(actionListener, l);
+    }
 
-    actionListener.actionPerformed(action);
+    public void mouseClicked(MouseEvent e)
+    {
+        ActionEvent action = new ActionEvent(
+            this,
+            ActionEvent.ACTION_PERFORMED,
+            Integer.toString(block_num)
+        );
 
-    selected = true;
-    repaint();
-  }
+        actionListener.actionPerformed(action);
 
-  public void mouseEntered(MouseEvent e)
-  {
-  }
+        selected = true;
+        repaint();
+    }
 
-  public void mouseExited(MouseEvent e)
-  {
-  }
+    public void mouseEntered(MouseEvent e)
+    {
+    }
 
-  public void mousePressed(MouseEvent e)
-  {
-  }
+    public void mouseExited(MouseEvent e)
+    {
+    }
 
-  public void mouseReleased(MouseEvent e)
-  {
-  }
+    public void mousePressed(MouseEvent e)
+    {
+    }
+
+    public void mouseReleased(MouseEvent e)
+    {
+    }
 }
 
 public class BlockSelector extends JScrollPane implements ActionListener
 {
 
-  Block blocks[];
-  BlockPanel panels[];
+    Block blocks[];
+    BlockPanel panels[];
 
-  int cur_block;
-  ActionListener actionListener = null;
+    int cur_block;
+    ActionListener actionListener = null;
 
-  public BlockSelector()
-  {
-    super();
-  }
+    public BlockSelector()
+    {
+        super();
+    }
 
-  public void setBlocks(Block b[])
-  {
-    JPanel blockPanel = new JPanel();
-    JViewport view = new JViewport();    
-    int i;
+    public void setBlocks(Block b[])
+    {
+        JPanel blockPanel = new JPanel();
+        JViewport view = new JViewport();
+        int i;
 
-    panels = new BlockPanel[b.length];
-    blocks = b;
+        panels = new BlockPanel[b.length];
+        blocks = b;
 
-    blockPanel.setLayout(new GridLayout(b.length, 1));
+        blockPanel.setLayout(new GridLayout(b.length, 1));
 
-    for (i = 0; i < b.length; i++)
-      {
-        panels[i] = new BlockPanel(b, i);
-	blockPanel.add(panels[i]);
-	panels[i].setVisible(true);
-	panels[i].addActionListener(this);
-      }
+        for (i = 0; i < b.length; i++)
+        {
+            panels[i] = new BlockPanel(b, i);
+            blockPanel.add(panels[i]);
+            panels[i].setVisible(true);
+            panels[i].addActionListener(this);
+        }
 
-    view.add(blockPanel);
-    blockPanel.setVisible(true);
+        view.add(blockPanel);
+        blockPanel.setVisible(true);
 
-    setViewport(view);
-    validate();
-  }
+        setViewport(view);
+        validate();
+    }
 
-  public Block[] getBlocks() { return blocks; }
+    public Block[] getBlocks()
+    {
+        return blocks;
+    }
 
-  public void addActionListener(ActionListener l)
-  {
-    actionListener = AWTEventMulticaster.add(actionListener, l);
-  }
+    public void addActionListener(ActionListener l)
+    {
+        actionListener = AWTEventMulticaster.add(actionListener, l);
+    }
 
-  public void removeActionListener(ActionListener l)
-  {
-    actionListener = AWTEventMulticaster.remove(actionListener, l);
-  }
+    public void removeActionListener(ActionListener l)
+    {
+        actionListener = AWTEventMulticaster.remove(actionListener, l);
+    }
 
-  public void actionPerformed(ActionEvent e)
-  {
-    ActionEvent action = new ActionEvent(this, 
-					 ActionEvent.ACTION_PERFORMED,
-					 e.getActionCommand());
+    public void actionPerformed(ActionEvent e)
+    {
+        ActionEvent action = new ActionEvent(
+            this,
+            ActionEvent.ACTION_PERFORMED,
+            e.getActionCommand()
+        );
 
-    actionListener.actionPerformed(action);
+        actionListener.actionPerformed(action);
 
-    panels[cur_block].unselect();
+        panels[cur_block].unselect();
 
-    try
-      {
-	cur_block = Integer.parseInt(e.getActionCommand());
-      }
-    catch (Exception ex)
-      {
-      }
-  }
+        try
+        {
+            cur_block = Integer.parseInt(e.getActionCommand());
+        }
+        catch (Exception ex)
+        {
+        }
+    }
 }
