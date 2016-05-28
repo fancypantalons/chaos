@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="chaos:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/chaos_jar</output-path>
+    <root id="archive" name="chaos.jar">
+      <element id="module-output" name="chaos" />
+    </root>
+  </artifact>
+</component>

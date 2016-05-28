@@ -1,0 +1,11 @@
+*.class
+*.swp
+*.swo
+bin
+gen
+out
+workspace.xml
+tasks.xml
+local.properties
+build
+.gradle
